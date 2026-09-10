@@ -43,6 +43,7 @@ components/
   guide/
     guide-view.tsx              # Misafir ekranı, dil seçimi, çevre kartları
     guest-loader.tsx            # LocalStorage sorgusu ve bulunamadı durumları
+    static-route-fallback.tsx   # Statik yayında sonradan oluşturulan rehber adresleri
     wifi-card.tsx               # Pano kopyalama + hata/başarı bildirimi
     instructions-accordion.tsx  # Cihaz ve ev talimatları
   dashboard/
@@ -53,13 +54,14 @@ lib/
   types.ts                      # TypeScript tipleri + Zod şeması
   i18n.ts                       # TR / EN / AR arayüz sözlüğü
   utils.ts                      # cn, Türkçe slug, güvenli URL, WhatsApp biçimleme
+  public-route.ts                # Rehber URL eşleştirme ve geçersiz yol kontrolü
   webmcp.ts                     # Destekleyen istemciler için isteğe bağlı araçlar
   repositories/
     guide-repository.ts         # Değiştirilebilir veri katmanı
 public/
   icon.svg                      # Konak simgesi
 scripts/
-  build-sites.mjs               # Sites için Next.js statik export + rehber rewrite
+  build-sites.mjs               # Sites için Next.js statik export + SPA kontrolü
 tests/
   guide-repository.test.ts       # Kayıt, tekrar açma, slug, hata ve URL testleri
 .openai/hosting.json            # Sites hedefi
@@ -99,7 +101,7 @@ package-lock.json
 
 ## Sites statik dağıtımı
 
-Varsayılan `npm run build` ve `npm start`, gerçek Next.js Node sunucusunu kullanır. `npm run build:sites` aynı uygulamayı `out/` içine statik çıkarır. Next.js statik export bilinmeyen slug'ları önceden üretemediğinden, Sites/Cloudflare üzerinde `/rehber/*` rotası `guest-shell.html` belgesine dahili olarak yönlenir. İstemci gerçek URL'deki slug ile LocalStorage'a bakar. Yeni rehber bağlantıları tam belge gezinmesi kullanır. Başka statik hostta eşdeğer rewrite gerekir. Supabase SSR aşamasında normal Next.js sunucusu kullanılır ve bu statik adaptör kaldırılabilir.
+Varsayılan `npm run build` ve `npm start`, gerçek Next.js Node sunucusunu kullanır. `npm run build:sites` aynı uygulamayı `out/` içine statik çıkarır. `.openai/hosting.json` içindeki `static.not_found_handling: "single-page-application"`, derlemeden sonra oluşturulan URL'ler için `index.html` döndürür. `StaticRouteFallback`, gerçek tarayıcı URL'si `/rehber/<slug>` ise ilgili rehberi LocalStorage'dan açar. Ana sayfa korunur; ilgisiz veya geçersiz yollar sayfa bulunamadı ekranını gösterir. 404 belgesinde de aynı rehber kurtarma bileşeni bulunur. `_redirects` dosyasının Sites tarafından işlendiği varsayılmaz. Başka statik hostta `index.html` SPA fallback ayarı gerekir. Genel SPA fallback nedeniyle bilinmeyen yolların HTTP durumu 200 olabilir; gerçek sunucu 404 durumları gerektiğinde normal Next.js sunucusu kullanılmalıdır. Supabase SSR aşamasında bu statik adaptör kaldırılabilir.
 
 Kaynaklar: [Next.js Static Exports](https://nextjs.org/docs/app/guides/static-exports), [Cloudflare Static Assets Redirects](https://developers.cloudflare.com/workers/static-assets/redirects/).
 

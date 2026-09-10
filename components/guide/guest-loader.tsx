@@ -7,15 +7,15 @@ import { mockGuide } from "@/lib/mock-data";
 import { getGuideRepository } from "@/lib/repositories/guide-repository";
 import type { Guide } from "@/lib/types";
 import { Button } from "@/components/ui/button";
+import { resolvePublicRoute } from "@/lib/public-route";
 export function GuestLoader({ slug }: { slug: string }) {
   const [guide, setGuide] = useState<Guide | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
     let active = true;
-    const actualSlug = decodeURIComponent(
-      window.location.pathname.split("/").filter(Boolean)[1] || slug,
-    );
+    const route = resolvePublicRoute(window.location.pathname);
+    const actualSlug = route.kind === "guide" ? route.slug : slug;
     async function load() {
       try {
         const found = await getGuideRepository().findBySlug(actualSlug);
