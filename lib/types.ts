@@ -40,6 +40,8 @@ export const guideSchema = z.object({
   instructions: z.array(instructionSchema).max(20),
   places: z.array(placeSchema).max(20),
   updatedAt: z.string(),
+  publishedAt: z.string().nullable().optional(),
+  revision: z.number().int().nonnegative().optional(),
 });
 export type Guide = z.infer<typeof guideSchema>;
 export type Instruction = Guide["instructions"][number];

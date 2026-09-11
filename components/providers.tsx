@@ -1,6 +1,7 @@
 "use client";
 import { ThemeProvider, useTheme } from "next-themes";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/components/auth/auth-provider";
 function Notifications() {
   const { resolvedTheme } = useTheme();
   return (
@@ -16,7 +17,7 @@ function Notifications() {
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
     <ThemeProvider attribute="class" defaultTheme="light" enableSystem>
-      {children}
+      <AuthProvider>{children}</AuthProvider>
       <Notifications />
     </ThemeProvider>
   );

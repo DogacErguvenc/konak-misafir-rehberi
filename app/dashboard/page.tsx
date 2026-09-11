@@ -1,5 +1,5 @@
-import { DashboardEditor } from "@/components/dashboard/dashboard-editor";
-export const metadata = { title: "Ev Sahibi Paneli" };
+import { HostDashboard } from "@/components/dashboard/host-dashboard";
+export const metadata = { title: "Ev Sahibi Paneli", robots: { index: false } };
 export default function DashboardPage() {
-  return <DashboardEditor />;
+  return <HostDashboard />;
 }

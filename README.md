@@ -2,6 +2,8 @@
 
 Türkiye'deki villa, bungalov ve kısa dönem kiralama işletmeleri için Next.js App Router MVP'si. Misafir rehberi, dört adımlı ev sahibi paneli ve etkileşimli telefon önizlemeli açılış sayfası aynı veri modelini kullanır.
 
+**Hesap ve ortak veritabanı aşaması:** Supabase Auth, işletme yalıtımı, yayımlanmış rehberler, taslaklar ve eski kayıt aktarımı eklendi. Canlı bağlantıyı açmak için [Supabase kurulumunu](docs/supabase-setup.md) tamamlayın. İki bağlantı değişkeni tanımlı değilken mevcut yerel deneme modu korunur; eksik veya hatalı bulut ayarı sessizce yerel kayda dönmez.
+
 ## Kurulum
 
 Node.js 20.9+ gereklidir. Kilitli sürümlerle bu projeyi kurmak için `npm ci` çalıştırın. Yeni bir projede bütün bağımlılıkları tek komutla kurmak için:
@@ -86,7 +88,7 @@ package-lock.json
 ## MVP sınırları
 
 - LocalStorage yalnızca aynı origin, tarayıcı profili ve cihazda kullanılabilir. Yeni bir rehberin QR'ı başka telefonda o rehbere erişim sağlamaz. Her cihazda erişilebilen demo: `/rehber/sapanca-doga-3`.
-- Bu sürümde hesap, sunucu veritabanı, ödeme, abonelik, erişim yetkileri ve cihazlar arası senkronizasyon yoktur. Dashboard bir kimlik doğrulama ekranıyla korunmaz.
+- Supabase bağlandığında dashboard oturum gerektirir. Veritabanı yetkilendirmesi istemciden bağımsız olarak işletme üyeliğini kontrol eder; yayımlanan rehberler farklı cihazlardan okunur. Henüz bağlanmamış yerel denemede hesap/erişim kontrolü yoktur. Ödeme ve abonelik bu aşamada yoktur.
 - Sites yayını özel önizlemedir; kamuya açık misafir erişimi değildir. Gerçek işletme kullanımında hem paylaşım erişimi hem sunucu verisi gerekir.
 - TR/EN/AR seçiminde arayüz metinleri değişir; Arapça görünüm RTL'dir. Ev sahibinin girdiği metinler otomatik çevrilmez; yabancı dilde bu durum açıklanır.
 - Mobil uygulama hissi vardır; service worker, çevrimdışı kullanım veya tam yüklenebilir PWA bu aşamanın kapsamına dahil değildir.
@@ -95,9 +97,9 @@ package-lock.json
 
 ## Supabase'e geçiş
 
-`GuideRepository` arayüzü `list`, `findBySlug` ve `save` metotlarını tanımlar. UI bunları çağırır. İleride bu arayüzü uygulayan `SupabaseGuideRepository` ekleyip fabrika fonksiyonunu değiştirebilirsiniz.
+`CloudGuideRepository`, mevcut veri arayüzünü uygular. `HostDashboard` oturum ve işletmeyi seçip repository'yi editöre geçirir; misafirler yalnızca `get_published_guide(slug)` fonksiyonunu kullanır. SQL fonksiyonları `auth.uid()` ile yetki kontrolü yapar. `workspaces`, `workspace_members`, `guides` tablolarına doğrudan API erişimi verilmez; her tabloda RLS açıktır.
 
-Önerilen şema: `properties(id, host_id, slug UNIQUE, name, cover_image, address, maps_url, wifi_name, wifi_password, whatsapp, check_in, check_out)`, `instructions(property_id, position, title, description)`, `places(property_id, position, name, category, distance, maps_url, image_url)`. Host oturumunu ve RLS politikalarını sunucuda uygulayın; misafirler için yalnızca yayımlanmış rehberi döndüren ayrı bir okuma akışı kurun. Wi-Fi ve iletişim bilgilerini içeren rehberin kimlere açık olacağını ürün kararı olarak belirleyin. Service role anahtarını istemciye koymayın.
+Şema ve izinler: `supabase/migrations/202609110001_tenant_guidebooks.sql`. `draft_data` ve `published_data` ayrı tutulur. İçe aktarım `(workspace_id, source_id)` üzerinden tekrar edilebilir ve güncel bulut verisini ezmez. Yazmalar `revision` ile eşzamanlı düzenleme çakışmasını bildirir. Kurulum, SMTP, paylaşım erişimi ve canlı kabul adımları: [docs/supabase-setup.md](docs/supabase-setup.md). `npm test` SQL şemasını ve izinleri yerel PostgreSQL motorunda da çalıştırır.
 
 ## Sites statik dağıtımı
 

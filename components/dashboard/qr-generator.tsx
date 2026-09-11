@@ -5,7 +5,7 @@ import { Check, Copy, ExternalLink, House, Printer, ScanLine } from "lucide-reac
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import type { Guide } from "@/lib/types";
-export function QrGenerator({ guide }: { guide: Guide }) {
+export function QrGenerator({ guide, cloud = false }: { guide: Guide; cloud?: boolean }) {
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
   useEffect(() => setUrl(`${window.location.origin}/rehber/${guide.slug}`), [guide.slug]);
@@ -86,12 +86,21 @@ export function QrGenerator({ guide }: { guide: Guide }) {
           Yazdırma penceresinde “PDF olarak kaydet” seçeneğini kullanabilirsiniz. Kartı girişe veya
           sehpanın üzerine yerleştirin.
         </p>
-        <div className="local-notice">
-          <strong>Bu sürümde kayıtlar bu tarayıcıda.</strong>
-          <br />
-          Yeni rehberin QR kodu başka bir cihazda aynı içeriği açmaz. Cihazlar arası paylaşım için
-          Supabase bağlantısı gerekir. Örnek rehber her cihazda görüntülenebilir.
-        </div>
+        {cloud ? (
+          <div className="local-notice">
+            <strong>Rehberiniz yayımlandı.</strong>
+            <br />
+            Bağlantıyı bilen misafirler yayımladığınız bilgileri görebilir. Evin adını değiştirseniz
+            de QR adresi aynı kalır.
+          </div>
+        ) : (
+          <div className="local-notice">
+            <strong>Bu sürümde kayıtlar bu tarayıcıda.</strong>
+            <br />
+            Yeni rehberin QR kodu başka bir cihazda aynı içeriği açmaz. Cihazlar arası paylaşım için
+            Supabase bağlantısı gerekir. Örnek rehber her cihazda görüntülenebilir.
+          </div>
+        )}
       </div>
     </div>
   );

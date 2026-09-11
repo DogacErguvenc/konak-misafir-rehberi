@@ -28,7 +28,9 @@ import { QrGenerator } from "@/components/dashboard/qr-generator";
 import { PropertyImage } from "@/components/guide/guide-view";
 import { mockGuide } from "@/lib/mock-data";
 import { guideSchema, type Guide, type Place } from "@/lib/types";
-import { getGuideRepository } from "@/lib/repositories/guide-repository";
+import type { GuideRepository } from "@/lib/repositories/guide-repository";
+import { LocalImport } from "./local-import";
+import { SignOutButton } from "./host-dashboard";
 import { cn } from "@/lib/utils";
 import { registerGuideTools } from "@/lib/webmcp";
 const steps = [
@@ -101,7 +103,16 @@ function Field({
     </div>
   );
 }
-export function DashboardEditor() {
+export function DashboardEditor({
+  repository,
+  workspace,
+  workspacePicker,
+}: {
+  repository: GuideRepository;
+  workspace?: { id: string; name: string };
+  workspacePicker?: React.ReactNode;
+}) {
+  const cloud = Boolean(workspace);
   const [draft, setDraft] = useState<Guide>(mockGuide);
   const [guides, setGuides] = useState<Guide[]>([]);
   const [step, setStep] = useState(0);
@@ -110,6 +121,7 @@ export function DashboardEditor() {
   const [loadError, setLoadError] = useState("");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<Guide | null>(null);
+  const [savedAsDraft, setSavedAsDraft] = useState(false);
   const [dirty, setDirty] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const heading = useRef<HTMLHeadingElement>(null);
@@ -118,15 +130,17 @@ export function DashboardEditor() {
     let active = true;
     async function init() {
       try {
-        const list = await getGuideRepository().list();
+        const list = await repository.list();
         if (active) {
           setGuides(list);
           setDraft(list[0] ?? newDraft());
         }
-      } catch {
+      } catch (error) {
         if (active) {
           setLoadError(
-            "Kayıtlar okunamadı. Tarayıcı depolaması engellenmiş veya kayıt verisi bozulmuş olabilir. Var olan verileriniz değiştirilmedi.",
+            error instanceof Error
+              ? error.message
+              : "Rehberler yüklenemedi. Lütfen sayfayı yenileyip tekrar deneyin.",
           );
           setDraft(newDraft());
         }
@@ -138,7 +152,7 @@ export function DashboardEditor() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [repository]);
   useEffect(() => {
     if (!dirty) return;
     const warn = (e: BeforeUnloadEvent) => {
@@ -157,31 +171,46 @@ export function DashboardEditor() {
       return copy;
     });
   }
-  const saveGuide = useCallback(async (input: Guide) => {
-    if (savingRef.current) throw new Error("Kaydetme işlemi sürüyor.");
-    savingRef.current = true;
-    setSaving(true);
-    try {
-      const result = await getGuideRepository().save(input);
-      setDraft(result);
-      setSaved(result);
-      setGuides(await getGuideRepository().list());
-      setDirty(false);
-      setErrors({});
-      toast.success("Rehber kaydedildi. QR kodunuz hazır!");
-      return result;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "Rehber kaydedilemedi.";
-      toast.error(message);
-      throw error;
-    } finally {
-      savingRef.current = false;
-      setSaving(false);
-    }
-  }, []);
+  const saveGuide = useCallback(
+    async (input: Guide, publish = true) => {
+      if (savingRef.current) throw new Error("Kaydetme işlemi sürüyor.");
+      savingRef.current = true;
+      setSaving(true);
+      try {
+        const result = await repository.save(input, { publish });
+        setDraft(result);
+        setSaved(result);
+        setSavedAsDraft(cloud && !publish);
+        setGuides((previous) => [result, ...previous.filter((g) => g.id !== result.id)]);
+        setDirty(false);
+        setErrors({});
+        toast.success(
+          cloud
+            ? publish
+              ? "Rehber yayımlandı. QR kodunuz hazır!"
+              : "Taslak kaydedildi. Misafire gösterilen içerik değiştirilmedi."
+            : "Rehber bu tarayıcıya kaydedildi.",
+        );
+        return result;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Rehber kaydedilemedi.";
+        toast.error(message);
+        throw error;
+      } finally {
+        savingRef.current = false;
+        setSaving(false);
+      }
+    },
+    [repository, cloud],
+  );
   useEffect(
-    () => registerGuideTools({ save: saveGuide, list: () => getGuideRepository().list() }),
-    [saveGuide],
+    () =>
+      registerGuideTools({
+        save: (guide) => saveGuide(guide, false),
+        list: () => repository.list(),
+        cloud,
+      }),
+    [saveGuide, repository, cloud],
   );
   function validate(target: number, all = false) {
     const parsed = guideSchema.safeParse(draft);
@@ -220,6 +249,7 @@ export function DashboardEditor() {
     }
   }
   function switchGuide(next: Guide) {
+    if (savingRef.current) return;
     if (
       dirty &&
       !window.confirm(
@@ -280,10 +310,12 @@ export function DashboardEditor() {
           <div className="workspace-badge">
             <span>K</span>
             <div>
-              <strong>Benim evlerim</strong>
+              <strong>{workspace?.name ?? "Benim evlerim"}</strong>
               <small>Konak çalışma alanı</small>
             </div>
           </div>
+          {workspacePicker}
+          {cloud && <SignOutButton />}
           <div className="sidebar-item">
             <LayoutGrid size={16} />
             Rehberlerim<span>{guides.length}</span>
@@ -321,7 +353,13 @@ export function DashboardEditor() {
           <div className="dashboard-heading">
             <div>
               <span className="section-eyebrow">GÜZEL BİR KONAKLAMA BURADA BAŞLAR</span>
-              <h1>{saved ? "Rehberiniz hazır." : "Evinize bir rehber hazırlayın."}</h1>
+              <h1>
+                {saved
+                  ? cloud && (savedAsDraft || !saved.publishedAt)
+                    ? "Taslağınız kaydedildi."
+                    : "Rehberiniz hazır."
+                  : "Evinize bir rehber hazırlayın."}
+              </h1>
               <p>
                 {saved
                   ? "Küçük detaylar tamam. Sıra misafirinizi karşılamakta."
@@ -330,12 +368,41 @@ export function DashboardEditor() {
             </div>
             <span className={cn("draft-label", saved && "saved")}>
               <span />
-              {saved ? "Kaydedildi" : dirty ? "Kaydedilmedi" : "Taslak"}
+              {dirty
+                ? "Kaydedilmedi"
+                : cloud && draft.publishedAt
+                  ? "Yayında"
+                  : saved
+                    ? "Kaydedildi"
+                    : "Taslak"}
             </span>
           </div>
+          {cloud ? (
+            <>
+              <div className="mobile-workspace">
+                <strong>{workspace?.name}</strong>
+                <SignOutButton />
+              </div>
+              <LocalImport
+                repository={repository}
+                workspaceName={workspace!.name}
+                onImported={async () => {
+                  setGuides(await repository.list());
+                }}
+              />
+            </>
+          ) : (
+            <div className="local-notice dashboard-local-notice">
+              <strong>Deneme paneli · Kayıtlar bu tarayıcıda saklanır.</strong> Hesap bağlantısı
+              tamamlandığında rehberlerinizi işletmenize aktarabilirsiniz.
+            </div>
+          )}
           {loadError && (
             <div className="storage-error" role="alert">
               {loadError}
+              <Button type="button" variant="ghost" onClick={() => window.location.reload()}>
+                Tekrar dene
+              </Button>
             </div>
           )}
           {!loaded ? (
@@ -348,11 +415,63 @@ export function DashboardEditor() {
                 <span className="success-icon">
                   <CheckCheck size={26} />
                 </span>
-                <h2>İyi ev sahipliğine hoş geldiniz.</h2>
-                <p>Rehberinizi görüntüleyin veya evinize özel QR kartını yazdırın.</p>
+                <h2>
+                  {cloud && (savedAsDraft || !saved.publishedAt)
+                    ? "Yayımlamaya hazır olduğunuzda buradayız."
+                    : "İyi ev sahipliğine hoş geldiniz."}
+                </h2>
+                <p>
+                  {cloud && (savedAsDraft || !saved.publishedAt)
+                    ? "Taslağınız hesabınızda saklandı. Son değişiklikleriniz yayımladıktan sonra misafirlere gösterilir."
+                    : "Rehberinizi görüntüleyin veya evinize özel QR kartını yazdırın."}
+                </p>
               </div>
-              <QrGenerator guide={saved} />
+              {(!cloud || (!savedAsDraft && saved.publishedAt)) && (
+                <QrGenerator guide={saved} cloud={cloud} />
+              )}
               <div className="result-buttons">
+                {cloud && (savedAsDraft || !saved.publishedAt) && (
+                  <Button
+                    disabled={saving}
+                    onClick={() => void saveGuide(saved, true).catch(() => {})}
+                  >
+                    Değişiklikleri yayımla <QrCode size={16} />
+                  </Button>
+                )}
+                {cloud && saved.publishedAt && repository.unpublish && (
+                  <Button
+                    variant="outline"
+                    disabled={saving}
+                    onClick={async () => {
+                      if (
+                        !window.confirm(
+                          "Rehber yayından kaldırılsın mı? QR bağlantısını açan misafirler içeriği göremeyecek.",
+                        )
+                      )
+                        return;
+                      savingRef.current = true;
+                      setSaving(true);
+                      try {
+                        const result = await repository.unpublish!(saved);
+                        setSaved(result);
+                        setDraft(result);
+                        setGuides((previous) =>
+                          previous.map((g) => (g.id === result.id ? result : g)),
+                        );
+                        toast.success("Rehber yayından kaldırıldı.");
+                      } catch (error) {
+                        toast.error(
+                          error instanceof Error ? error.message : "İşlem tamamlanamadı.",
+                        );
+                      } finally {
+                        savingRef.current = false;
+                        setSaving(false);
+                      }
+                    }}
+                  >
+                    Yayından kaldır
+                  </Button>
+                )}
                 <Button
                   type="button"
                   variant="outline"
@@ -380,6 +499,7 @@ export function DashboardEditor() {
                     className={cn(step === i && "active", step > i && "complete")}
                     aria-current={step === i ? "step" : undefined}
                     onClick={() => moveStep(i)}
+                    disabled={saving}
                   >
                     <div>
                       <span className="step-number">{step > i ? <Check size={14} /> : i + 1}</span>
@@ -397,7 +517,7 @@ export function DashboardEditor() {
                     </h2>
                     <p>{steps[step].description}</p>
                   </div>
-                  <div className="editor-fields">
+                  <fieldset className="editor-fields" disabled={saving}>
                     {step === 0 && (
                       <>
                         <Field id="name" label="Evinizin adı" error={errors.name}>
@@ -693,7 +813,7 @@ export function DashboardEditor() {
                         </p>
                       </>
                     )}
-                  </div>
+                  </fieldset>
                   <div className="editor-footer">
                     {step > 0 ? (
                       <Button
@@ -708,11 +828,36 @@ export function DashboardEditor() {
                     ) : (
                       <span>İstediğiniz zaman düzenleyin.</span>
                     )}
+                    {cloud && step === 3 && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        disabled={saving || Boolean(loadError)}
+                        onClick={() => {
+                          if (validate(step, true)) void saveGuide(draft, false).catch(() => {});
+                        }}
+                      >
+                        Taslağı kaydet
+                      </Button>
+                    )}
                     <Button type="submit" disabled={saving || Boolean(loadError)}>
-                      {saving ? "Kaydediliyor…" : step === 3 ? "Kaydet & QR oluştur" : "Devam et"}
+                      {saving
+                        ? "Kaydediliyor…"
+                        : step === 3
+                          ? cloud
+                            ? "Kaydet & yayımla"
+                            : "Kaydet & QR oluştur"
+                          : "Devam et"}
                       {step === 3 ? <QrCode size={16} /> : <ArrowRight size={16} />}
                     </Button>
                   </div>
+                  {cloud && step === 3 && (
+                    <p className="publish-help">
+                      Yayımladığınız rehberin bağlantısına sahip kişiler Wi-Fi, adres ve iletişim
+                      bilgilerini görebilir. Taslak değişiklikleri yayımlayana kadar mevcut rehber
+                      aynı kalır.
+                    </p>
+                  )}
                 </form>
                 <aside className="editor-preview">
                   <div className="editor-preview-label">

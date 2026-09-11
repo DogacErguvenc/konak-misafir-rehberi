@@ -13,16 +13,18 @@ type ModelContext = {
 export function registerGuideTools(actions: {
   save: (guide: Guide) => Promise<Guide>;
   list: () => Promise<Guide[]>;
+  cloud?: boolean;
 }) {
   const context = (document as Document & { modelContext?: ModelContext }).modelContext;
   if (!context?.registerTool) return;
   const lifecycle = new AbortController();
   const tools: Tool[] = [
     {
-      name: "list_local_guest_guides",
+      name: actions.cloud ? "list_workspace_guest_guides" : "list_local_guest_guides",
       title: "List saved guest guides",
-      description:
-        "List guides saved in this browser. Does not reveal Wi-Fi passwords or contact details.",
+      description: actions.cloud
+        ? "List guides in the signed-in user's current workspace. Does not reveal Wi-Fi passwords or contact details."
+        : "List guides saved in this browser. Does not reveal Wi-Fi passwords or contact details.",
       inputSchema: { type: "object", properties: {}, additionalProperties: false },
       annotations: { readOnlyHint: true, untrustedContentHint: true },
       execute: async () => ({
@@ -30,10 +32,13 @@ export function registerGuideTools(actions: {
       }),
     },
     {
-      name: "save_local_guest_guide",
-      title: "Save a guest guide in this browser",
-      description:
-        "Validate and save a complete guide in this browser and display its QR card in the dashboard. This does not publish data across devices.",
+      name: actions.cloud ? "save_workspace_guest_draft" : "save_local_guest_guide",
+      title: actions.cloud
+        ? "Save a private guest guide draft"
+        : "Save a guest guide in this browser",
+      description: actions.cloud
+        ? "Validate and save a draft in the current workspace. Existing records require their current revision. Never publishes changes to guests."
+        : "Validate and save a complete guide in this browser and display its QR card in the dashboard. This does not publish data across devices.",
       inputSchema: {
         type: "object",
         properties: {
@@ -52,7 +57,11 @@ export function registerGuideTools(actions: {
           throw new Error("guide is required");
         const parsed = guideSchema.parse(input.guide);
         const saved = await actions.save(parsed);
-        return { id: saved.id, slug: saved.slug, status: "saved_locally" };
+        return {
+          id: saved.id,
+          slug: saved.slug,
+          status: actions.cloud ? "draft_saved" : "saved_locally",
+        };
       },
     },
   ];

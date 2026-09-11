@@ -1,5 +1,190 @@
 @import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
+.account-layout {
+  max-width: 1060px;
+  margin: 0 auto;
+  padding: 80px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 72px;
+  align-items: center;
+}
+.account-story {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 22px;
+}
+.account-story h1 {
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  line-height: 1.1;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+.account-story p,
+.account-card > p {
+  color: var(--muted-foreground);
+  line-height: 1.7;
+}
+.account-benefits {
+  display: grid;
+  gap: 15px;
+  font-size: 14px;
+}
+.account-benefits span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.account-card {
+  min-width: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.account-card h2,
+.account-card h1 {
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.account-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.account-links {
+  border-top: 1px solid var(--border);
+  padding-top: 22px;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  font-size: 14px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.account-notice {
+  display: grid;
+  gap: 16px;
+  line-height: 1.6;
+}
+.onboarding-layout {
+  max-width: 540px;
+  margin: 64px auto;
+  padding: 0 20px;
+}
+.import-notice {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px;
+  margin: 0 0 24px;
+  background: var(--card);
+}
+.import-notice summary {
+  cursor: pointer;
+  font-weight: 500;
+  font-size: 14px;
+}
+.import-notice summary svg {
+  display: inline;
+  margin-right: 8px;
+}
+.import-notice p {
+  margin: 16px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--muted-foreground);
+}
+.import-options {
+  display: grid;
+  gap: 12px;
+  margin: 16px 0;
+}
+.import-options label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+.import-options input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+.dashboard-local-notice {
+  margin-bottom: 24px;
+}
+.mobile-workspace {
+  display: none;
+}
+.publish-help {
+  padding: 0 24px 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+.nav-login {
+  font-size: 14px;
+  font-weight: 500;
+}
+.bg-primary {
+  color: var(--primary-foreground);
+}
+fieldset.editor-fields {
+  border: 0;
+  margin: 0;
+  min-width: 0;
+}
+.editor-footer {
+  flex-wrap: wrap;
+}
+@media (max-width: 900px) {
+  .account-layout {
+    gap: 32px;
+    padding: 40px 20px;
+  }
+  .mobile-workspace {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    font-size: 14px;
+  }
+}
+@media (max-width: 640px) {
+  .account-layout {
+    grid-template-columns: 1fr;
+    padding-top: 32px;
+    gap: 28px;
+  }
+  .account-story {
+    gap: 14px;
+  }
+  .account-story h1 {
+    font-size: 32px;
+  }
+  .account-benefits {
+    display: none;
+  }
+  .account-card {
+    padding: 24px;
+  }
+  .nav-login {
+    display: none;
+  }
+}
+@media print {
+  .mobile-workspace,
+  .import-notice {
+    display: none !important;
+  }
+}
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

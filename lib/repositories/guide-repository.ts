@@ -1,11 +1,16 @@
 import { guideSchema, type Guide } from "@/lib/types";
 import { mockGuide } from "@/lib/mock-data";
 import { slugify } from "@/lib/utils";
+import { isCloudConfigured } from "@/lib/supabase/config";
+import { getSupabaseClient } from "@/lib/supabase/client";
+import { findPublishedGuide } from "./cloud-guide-repository";
 
+export type SaveOptions = { publish?: boolean; importOnly?: boolean };
 export interface GuideRepository {
   list(): Promise<Guide[]>;
   findBySlug(slug: string): Promise<Guide | null>;
-  save(guide: Guide): Promise<Guide>;
+  save(guide: Guide, options?: SaveOptions): Promise<Guide>;
+  unpublish?(guide: Guide): Promise<Guide>;
 }
 export const STORAGE_KEY = "konak.guides.v1";
 export function parseStoredGuides(raw: string | null): Guide[] {
@@ -59,4 +64,11 @@ export class LocalGuideRepository implements GuideRepository {
 }
 export function getGuideRepository(): GuideRepository {
   return new LocalGuideRepository(window.localStorage);
+}
+
+export async function getGuestGuide(slug: string) {
+  if (slug === mockGuide.slug) return structuredClone(mockGuide);
+  // A missing or unpublished cloud record must never expose a browser draft.
+  if (isCloudConfigured()) return findPublishedGuide(getSupabaseClient(), slug);
+  return getGuideRepository().findBySlug(slug);
 }

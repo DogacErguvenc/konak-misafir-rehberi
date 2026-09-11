@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { ArrowUpRight, House, Moon, Sun } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/components/auth/auth-provider";
 export function Logo({ compact = false }: { compact?: boolean }) {
   return (
     <Link href="/" aria-label="Konak ana sayfa" className="logo">
@@ -40,6 +41,7 @@ export function ThemeToggle() {
   );
 }
 export function Navbar({ dashboard = false }: { dashboard?: boolean }) {
+  const { configured, session } = useAuth();
   return (
     <header className="site-navbar">
       <div className="navbar-inner">
@@ -58,9 +60,14 @@ export function Navbar({ dashboard = false }: { dashboard?: boolean }) {
         </nav>
         <div className="nav-actions">
           <ThemeToggle />
+          {!dashboard && configured && !session && (
+            <Link className="nav-login" href="/giris">
+              Giriş yap
+            </Link>
+          )}
           <Button asChild size="sm">
             <Link href={dashboard ? "/rehber/sapanca-doga-3" : "/dashboard"}>
-              {dashboard ? "Örnek rehber" : "Ücretsiz başla"}
+              {dashboard ? "Örnek rehber" : session ? "Panelim" : "Ücretsiz başla"}
               <ArrowUpRight size={16} />
             </Link>
           </Button>

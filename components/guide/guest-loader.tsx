@@ -4,7 +4,8 @@ import Link from "next/link";
 import { BookOpen, ArrowLeft } from "lucide-react";
 import { GuideView } from "./guide-view";
 import { mockGuide } from "@/lib/mock-data";
-import { getGuideRepository } from "@/lib/repositories/guide-repository";
+import { getGuestGuide } from "@/lib/repositories/guide-repository";
+import { isCloudConfigured } from "@/lib/supabase/config";
 import type { Guide } from "@/lib/types";
 import { Button } from "@/components/ui/button";
 import { resolvePublicRoute } from "@/lib/public-route";
@@ -17,16 +18,26 @@ export function GuestLoader({ slug }: { slug: string }) {
     const route = resolvePublicRoute(window.location.pathname);
     const actualSlug = route.kind === "guide" ? route.slug : slug;
     async function load() {
+      if (active) {
+        setLoading(true);
+        setGuide(null);
+        setError("");
+      }
       try {
-        const found = await getGuideRepository().findBySlug(actualSlug);
+        const found = await getGuestGuide(actualSlug);
         if (active) {
           setGuide(found);
           setError("");
         }
-      } catch {
+      } catch (error) {
         if (active) {
           if (actualSlug === mockGuide.slug) setGuide(mockGuide);
-          else setError("Tarayıcı kayıtlarına erişilemedi.");
+          else
+            setError(
+              error instanceof Error
+                ? error.message
+                : "Rehbere şu anda ulaşılamıyor. Lütfen tekrar deneyin.",
+            );
         }
       } finally {
         if (active) setLoading(false);
@@ -56,7 +67,9 @@ export function GuestLoader({ slug }: { slug: string }) {
         <h1>Bu rehber burada bulunamadı.</h1>
         <p>
           {error ||
-            "Rehber bağlantısını kontrol edin. Bu MVP’de yeni rehberler yalnızca oluşturuldukları tarayıcıda saklanır."}
+            (isCloudConfigured()
+              ? "Rehber henüz yayımlanmamış veya yayından kaldırılmış olabilir. Bağlantıyı kontrol edin ya da ev sahibinizle iletişime geçin."
+              : "Rehber bağlantısını kontrol edin. Bu deneme sürümünde yeni rehberler oluşturuldukları tarayıcıda saklanır.")}
         </p>
         <div>
           <Button asChild>
