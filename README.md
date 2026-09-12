@@ -2,14 +2,14 @@
 
 Türkiye'deki villa, bungalov ve kısa dönem kiralama işletmeleri için Next.js App Router MVP'si. Misafir rehberi, dört adımlı ev sahibi paneli ve etkileşimli telefon önizlemeli açılış sayfası aynı veri modelini kullanır.
 
-**Hesap ve ortak veritabanı aşaması:** Supabase Auth, işletme yalıtımı, yayımlanmış rehberler, taslaklar ve eski kayıt aktarımı eklendi. Canlı bağlantıyı açmak için [Supabase kurulumunu](docs/supabase-setup.md) tamamlayın. İki bağlantı değişkeni tanımlı değilken mevcut yerel deneme modu korunur; eksik veya hatalı bulut ayarı sessizce yerel kayda dönmez.
+**Hesap ve ortak veritabanı aşaması:** Supabase Auth, işletme yalıtımı, yayımlanmış rehberler, taslaklar ve eski kayıt aktarımı hazırdır. Konak Supabase projesinin bağlantısı, şeması ve canlı erişim kuralları 12 Eylül 2026'da doğrulandı. İlk kullanıcı hesabı ve e-posta/QR kabul testleri, müşteri e-postaları için SMTP ve misafirler için paylaşım erişimi hâlâ tamamlanmalıdır. Ayrıntılar: [Supabase kurulumu](docs/supabase-setup.md). Yeni bir kurulumda iki bağlantı değişkeni tanımlı değilse yerel deneme modu açılır; eksik veya hatalı bulut ayarı sessizce yerel kayda dönmez.
 
 ## Kurulum
 
 Node.js 20.9+ gereklidir. Kilitli sürümlerle bu projeyi kurmak için `npm ci` çalıştırın. Yeni bir projede bütün bağımlılıkları tek komutla kurmak için:
 
 ```powershell
-npm install next@^16 react@^19 react-dom@^19 typescript @types/node @types/react @types/react-dom tailwindcss @tailwindcss/postcss @radix-ui/react-accordion @radix-ui/react-slot class-variance-authority lucide-react clsx tailwind-merge next-themes qrcode.react sonner zod tsx
+npm install next@^16 react@^19 react-dom@^19 typescript @types/node @types/react @types/react-dom tailwindcss @tailwindcss/postcss @radix-ui/react-accordion @radix-ui/react-slot @supabase/supabase-js @electric-sql/pglite class-variance-authority lucide-react clsx tailwind-merge next-themes qrcode.react sonner zod tsx
 ```
 
 ```powershell
@@ -44,7 +44,7 @@ components/
     accordion.tsx               # Shadcn/Radix erişilebilir akordeon
   guide/
     guide-view.tsx              # Misafir ekranı, dil seçimi, çevre kartları
-    guest-loader.tsx            # LocalStorage sorgusu ve bulunamadı durumları
+    guest-loader.tsx            # Yayımlanmış bulut rehberi / yerel demo ve hata durumları
     static-route-fallback.tsx   # Statik yayında sonradan oluşturulan rehber adresleri
     wifi-card.tsx               # Pano kopyalama + hata/başarı bildirimi
     instructions-accordion.tsx  # Cihaz ve ev talimatları
@@ -78,17 +78,17 @@ package-lock.json
 ## Kullanım
 
 1. `/` açılış sayfasındaki telefonu kaydırabilir; Wi-Fi kartını, talimatları ve dili deneyebilirsiniz.
-2. `/dashboard` örnek bilgilerle başlar. Ev adı, fotoğraf ve adresi düzenleyin.
+2. Bulut bağlantısı varken `/kayit` üzerinden kayıt olup e-postanızı doğrulayın. `/dashboard` üzerinden işletmenizi oluşturun; ardından yeni rehberde ev adı, fotoğraf ve adresi düzenleyin. Bağlantısız yerel deneme örnek bilgilerle başlar.
 3. Wi-Fi ve WhatsApp alanlarını değiştirin. Talimat ve çevre önerisi ekleyip çıkarın.
-4. `Kaydet & QR oluştur` bütün formu doğrular, tarayıcıya kaydeder ve benzersiz slug üretir.
+4. Bulut modunda `Kaydet & yayımla` formu doğrular, işletmenize kaydeder ve misafir sürümünü yayımlar. Taslak kaydı mevcut yayını değiştirmez. Yerel modda `Kaydet & QR oluştur` tarayıcıya kaydeder. İlk kayıtta benzersiz slug üretilir.
 5. Gerçek QR kod, mevcut sitenin origin'i ile `/rehber/[slug]` bağlantısını içerir. Yeniden adlandırma, mevcut slug'ı değiştirmez.
 6. `QR kartını yazdır / PDF` tarayıcının baskı penceresini açar. A5 portre kartı veya PDF olarak kaydetme kullanılabilir.
 7. Panelde kayıtlı rehber seçilerek yeniden düzenlenebilir. Kayıtlar sayfa yenilense de korunur.
 
 ## MVP sınırları
 
-- LocalStorage yalnızca aynı origin, tarayıcı profili ve cihazda kullanılabilir. Yeni bir rehberin QR'ı başka telefonda o rehbere erişim sağlamaz. Her cihazda erişilebilen demo: `/rehber/sapanca-doga-3`.
-- Supabase bağlandığında dashboard oturum gerektirir. Veritabanı yetkilendirmesi istemciden bağımsız olarak işletme üyeliğini kontrol eder; yayımlanan rehberler farklı cihazlardan okunur. Henüz bağlanmamış yerel denemede hesap/erişim kontrolü yoktur. Ödeme ve abonelik bu aşamada yoktur.
+- Bağlantısız yerel denemede LocalStorage yalnızca aynı origin, tarayıcı profili ve cihazda kullanılabilir. Bu modda yeni rehberin QR'ı başka telefonda o rehbere erişim sağlamaz. Sabit demo: `/rehber/sapanca-doga-3`.
+- Bulut modunda dashboard oturum gerektirir. Veritabanı yetkilendirmesi istemciden bağımsız olarak işletme üyeliğini kontrol eder; yayımlanan rehberler siteye erişimi olan farklı cihazlardan okunabilir. Bağlantısız yerel denemede hesap/erişim kontrolü yoktur. Ödeme ve abonelik bu aşamada yoktur.
 - Sites yayını özel önizlemedir; kamuya açık misafir erişimi değildir. Gerçek işletme kullanımında hem paylaşım erişimi hem sunucu verisi gerekir.
 - TR/EN/AR seçiminde arayüz metinleri değişir; Arapça görünüm RTL'dir. Ev sahibinin girdiği metinler otomatik çevrilmez; yabancı dilde bu durum açıklanır.
 - Mobil uygulama hissi vardır; service worker, çevrimdışı kullanım veya tam yüklenebilir PWA bu aşamanın kapsamına dahil değildir.
@@ -103,7 +103,7 @@ package-lock.json
 
 ## Sites statik dağıtımı
 
-Varsayılan `npm run build` ve `npm start`, gerçek Next.js Node sunucusunu kullanır. `npm run build:sites` aynı uygulamayı `out/` içine statik çıkarır. `.openai/hosting.json` içindeki `static.not_found_handling: "single-page-application"`, derlemeden sonra oluşturulan URL'ler için `index.html` döndürür. `StaticRouteFallback`, gerçek tarayıcı URL'si `/rehber/<slug>` ise ilgili rehberi LocalStorage'dan açar. Ana sayfa korunur; ilgisiz veya geçersiz yollar sayfa bulunamadı ekranını gösterir. 404 belgesinde de aynı rehber kurtarma bileşeni bulunur. `_redirects` dosyasının Sites tarafından işlendiği varsayılmaz. Başka statik hostta `index.html` SPA fallback ayarı gerekir. Genel SPA fallback nedeniyle bilinmeyen yolların HTTP durumu 200 olabilir; gerçek sunucu 404 durumları gerektiğinde normal Next.js sunucusu kullanılmalıdır. Supabase SSR aşamasında bu statik adaptör kaldırılabilir.
+Varsayılan `npm run build` ve `npm start`, gerçek Next.js Node sunucusunu kullanır. `npm run build:sites` aynı uygulamayı `out/` içine statik çıkarır. `.openai/hosting.json` içindeki `static.not_found_handling: "single-page-application"`, derlemeden sonra oluşturulan URL'ler için `index.html` döndürür. `StaticRouteFallback`, gerçek tarayıcı URL'si `/rehber/<slug>` ise `GuestLoader` bileşenini açar: bulut modunda yalnızca yayımlanmış rehber sorgulanır; bağlantısız yerel modda LocalStorage kullanılır. Ana sayfa korunur; ilgisiz veya geçersiz yollar sayfa bulunamadı ekranını gösterir. 404 belgesinde de aynı rehber kurtarma bileşeni bulunur. `_redirects` dosyasının Sites tarafından işlendiği varsayılmaz. Başka statik hostta `index.html` SPA fallback ayarı gerekir. Genel SPA fallback nedeniyle bilinmeyen yolların HTTP durumu 200 olabilir; gerçek sunucu 404 durumları gerektiğinde normal Next.js sunucusu kullanılmalıdır. Supabase SSR aşamasında bu statik adaptör kaldırılabilir.
 
 Kaynaklar: [Next.js Static Exports](https://nextjs.org/docs/app/guides/static-exports), [Cloudflare Static Assets Redirects](https://developers.cloudflare.com/workers/static-assets/redirects/).
 

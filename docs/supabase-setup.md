@@ -1,6 +1,10 @@
 # Konak hesaplarını ve ortak veritabanını etkinleştirme
 
-Hesap, işletme ve yayımlanmış rehber kodları hazırdır. Canlı Supabase projesi oluşturulup aşağıdaki bağlantı yapılıncaya kadar mevcut site yerel deneme modunda çalışır. Bu belge tamamlanmış bir canlı kurulum iddiası değildir.
+Konak Supabase projesi (`engsmwhpktkbielnxoju`, Frankfurt) oluşturuldu ve uygulamanın bağlantı ayarları 12 Eylül 2026'da yapılandırıldı. Şema kuruldu; canlı API bağlantısı ve anonim tablo erişim engelleri doğrulandı. Canlı PostgreSQL üzerinde geçici iki kullanıcı kimliğiyle işletme ayrımı, taslak/yayın ayrımı ve yayından kaldırma denendi; işlem sonunda tüm deneme verileri geri alındı. Bu kontrol gerçek kullanıcı girişi veya e-posta teslimi testi değildir.
+
+Site URL ve canlı `/dashboard/`, `/sifre-yenile/` dönüş adresleri kaydedildi. E-posta ile kayıt ve e-posta doğrulama açık. Yerel `.env.local` ve Sites ortam ayarlarında yalnızca public bağlantı değerleri bulunur; statik dağıtım için bu değerlerle yeniden derleme gerekir.
+
+**Kalan kabul adımları:** kullanıcının ilk Konak hesabını açıp doğrulaması, gerçek rehber yayımlama/QR ve şifre yenileme denemesi, müşterilere e-posta için özel SMTP ve misafir erişimi için site paylaşımının açılması. Site hâlâ sahibine özel; satışa hazır olduğu iddia edilmez. Aşağıdaki adımlar yeni bir ortamda kurulum veya sonraki bakım içindir.
 
 ## 1. Projeyi oluştur
 
@@ -40,7 +44,7 @@ Authentication → URL Configuration:
 - Site URL: `https://konak-misafir-rehberi.dogac-erguvenc.chatgpt.site`
 - Redirect URLs: `https://konak-misafir-rehberi.dogac-erguvenc.chatgpt.site/dashboard/`
 - Redirect URLs: `https://konak-misafir-rehberi.dogac-erguvenc.chatgpt.site/sifre-yenile/`
-- Yerel deneme için ayrıca `http://localhost:3000/dashboard/` ve `http://localhost:3000/sifre-yenile/`.
+- Yerel ortamda e-posta akışını deneyeceksen ayrıca `http://localhost:3000/dashboard/` ve `http://localhost:3000/sifre-yenile/` ekle. Bu isteğe bağlı adresler canlı projeye eklenmedi.
 
 Email/password sağlayıcısını ve e-posta doğrulamasını açık bırak. Uygulama tarayıcı tabanlı Supabase implicit akışını kullanır; token'ları Supabase istemcisi işler. Misafirler hesap açmaz.
 
