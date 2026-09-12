@@ -25,6 +25,7 @@ import { Navbar } from "@/components/navbar";
 import { Button } from "@/components/ui/button";
 import { Input, Textarea } from "@/components/ui/input";
 import { QrGenerator } from "@/components/dashboard/qr-generator";
+import { PublishedQr } from "@/components/dashboard/published-qr";
 import { PropertyImage } from "@/components/guide/guide-view";
 import { mockGuide } from "@/lib/mock-data";
 import { guideSchema, type Guide, type Place } from "@/lib/types";
@@ -377,6 +378,13 @@ export function DashboardEditor({
                     : "Taslak"}
             </span>
           </div>
+          {loaded && cloud && draft.publishedAt && (!saved || savedAsDraft) && (
+            <PublishedQr
+              key={`${workspace!.id}:${draft.slug}:${draft.publishedAt}`}
+              slug={draft.slug}
+              repository={repository}
+            />
+          )}
           {cloud ? (
             <>
               <div className="mobile-workspace">

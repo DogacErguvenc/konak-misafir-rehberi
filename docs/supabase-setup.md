@@ -4,7 +4,9 @@ Konak Supabase projesi (`engsmwhpktkbielnxoju`, Frankfurt) oluşturuldu ve uygul
 
 Site URL ve canlı `/dashboard/`, `/sifre-yenile/` dönüş adresleri kaydedildi. E-posta ile kayıt ve e-posta doğrulama açık. Yerel `.env.local` ve Sites ortam ayarlarında yalnızca public bağlantı değerleri bulunur; statik dağıtım için bu değerlerle yeniden derleme gerekir.
 
-**Kalan kabul adımları:** kullanıcının ilk Konak hesabını açıp doğrulaması, gerçek rehber yayımlama/QR ve şifre yenileme denemesi, müşterilere e-posta için özel SMTP ve misafir erişimi için site paylaşımının açılması. Site hâlâ sahibine özel; satışa hazır olduğu iddia edilmez. Aşağıdaki adımlar yeni bir ortamda kurulum veya sonraki bakım içindir.
+**13 Eylül durumu:** ilk Konak hesabının e-postası doğrulandı ve işletmesi oluşturuldu. Tarayıcıdaki eski Sapanca rehberi taslak olarak buluta aktarıldı; yenilemeden sonra kaydın korunduğu görüldü. Yalnızca kurgusal bilgiler içeren ayrı `Konak Demo Rehberi` yayımlandı. Anonim Supabase API isteği demo içeriğini okudu, eski Sapanca taslağı için `null` döndü. Yeni rehber adresi sahip oturumunda açıldı; Wi-Fi kopyalama bildirimi ve talimat akordeonu çalıştı. Fiziksel telefonda QR taraması henüz yapılmadı.
+
+**Kalan kabul adımları:** şifre yenileme akışının kullanıcının kendisiyle denenmesi, müşterilere e-posta için özel SMTP ve misafir erişimi için site paylaşımının açılması. Kullanıcının henüz alan adı veya e-posta gönderim hizmeti hesabı yok. Site sahibine özel; oturumsuz yeni sekmede ChatGPT giriş ekranı gösteriyor. Bu nedenle satışa hazır olduğu iddia edilmez. Aşağıdaki adımlar yeni bir ortamda kurulum veya sonraki bakım içindir.
 
 ## 1. Projeyi oluştur
 
@@ -73,6 +75,7 @@ Hesap bağlandıktan sonra gerçek Supabase ortamında doğrula:
 - Tekrar yayımla; misafir yeni içeriği görmeli. Yayından kaldırınca yeni okumalar içerik döndürmemeli.
 - Şifremi unuttum akışını e-posta gönderiminden şifre güncellemeye kadar dene.
 - İki sekmede aynı rehberi düzenle; eski sürümle yapılan kayıt güncel veriyi ezmeden hata vermeli.
+- Panel yenilendikten sonra yayımlanmış rehberde “Yayımdaki QR kodunu aç” ile mevcut kartı yeniden aç. Bu işlem kayıt veya yayımlama yapmaz; kart üzerindeki ev adı da yalnızca yayımlanmış sürümden gelir. Taslak değişiklikleri korunmalıdır.
 
 Yerel testler PGlite PostgreSQL motorunda şemayı, fonksiyon izinlerini, iki işletme kimliğini, taslak/yayın ayrımını, tekrar aktarımı ve sürüm çakışmasını çalıştırır. Supabase Auth, PostgREST, e-posta teslimi ve farklı cihaz testleri canlı proje olmadan doğrulanmış sayılmaz.
 

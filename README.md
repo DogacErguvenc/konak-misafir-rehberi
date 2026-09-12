@@ -2,7 +2,7 @@
 
 Türkiye'deki villa, bungalov ve kısa dönem kiralama işletmeleri için Next.js App Router MVP'si. Misafir rehberi, dört adımlı ev sahibi paneli ve etkileşimli telefon önizlemeli açılış sayfası aynı veri modelini kullanır.
 
-**Hesap ve ortak veritabanı aşaması:** Supabase Auth, işletme yalıtımı, yayımlanmış rehberler, taslaklar ve eski kayıt aktarımı hazırdır. Konak Supabase projesinin bağlantısı, şeması ve canlı erişim kuralları 12 Eylül 2026'da doğrulandı. İlk kullanıcı hesabı ve e-posta/QR kabul testleri, müşteri e-postaları için SMTP ve misafirler için paylaşım erişimi hâlâ tamamlanmalıdır. Ayrıntılar: [Supabase kurulumu](docs/supabase-setup.md). Yeni bir kurulumda iki bağlantı değişkeni tanımlı değilse yerel deneme modu açılır; eksik veya hatalı bulut ayarı sessizce yerel kayda dönmez.
+**Hesap ve ortak veritabanı aşaması:** Supabase Auth, işletme yalıtımı, yayımlanmış rehberler, taslaklar ve eski kayıt aktarımı hazırdır. Canlı bağlantı ve erişim kuralları doğrulandı; ilk hesap e-postası doğrulanıp işletme oluşturuldu, eski rehber taslak olarak aktarıldı. 13 Eylül 2026'da kurgusal bir demo rehberi yayımlandı ve yeni misafir adresi açıldı; anonim API erişimi de doğrulandı. Müşteri e-postaları için SMTP, misafirler için site paylaşımı, şifre yenileme ve fiziksel QR kabul testi kalmıştır. Ayrıntılar: [Supabase kurulumu](docs/supabase-setup.md). Yeni bir kurulumda iki bağlantı değişkeni tanımlı değilse yerel deneme modu açılır; eksik veya hatalı bulut ayarı sessizce yerel kayda dönmez.
 
 ## Kurulum
 
@@ -51,6 +51,7 @@ components/
   dashboard/
     dashboard-editor.tsx        # Dört adım, doğrulama, dinamik maddeler, önizleme
     qr-generator.tsx            # Gerçek SVG QR, link kopyalama, Print/PDF
+    published-qr.tsx            # Taslağı yayımlamadan mevcut QR kartını tekrar açma
 lib/
   mock-data.ts                  # Gerçekçi ve kurgusal Sapanca örneği
   types.ts                      # TypeScript tipleri + Zod şeması
@@ -84,6 +85,7 @@ package-lock.json
 5. Gerçek QR kod, mevcut sitenin origin'i ile `/rehber/[slug]` bağlantısını içerir. Yeniden adlandırma, mevcut slug'ı değiştirmez.
 6. `QR kartını yazdır / PDF` tarayıcının baskı penceresini açar. A5 portre kartı veya PDF olarak kaydetme kullanılabilir.
 7. Panelde kayıtlı rehber seçilerek yeniden düzenlenebilir. Kayıtlar sayfa yenilense de korunur.
+8. Yayımlanmış bir rehberde `Yayımdaki QR kodunu aç`, kaydetmeden veya tekrar yayımlamadan son yayımlanan sürümün QR kartını getirir. Düzenlediğiniz taslak korunur.
 
 ## MVP sınırları
 
