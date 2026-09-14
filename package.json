@@ -5,6 +5,10 @@
   "scripts": {
     "dev": "next dev --hostname 0.0.0.0",
     "build": "next build --webpack",
+    "build:static": "node scripts/build-static.mjs",
+    "build:cloudflare": "node scripts/build-static.mjs --cloud",
+    "preview:cloudflare": "wrangler dev --local",
+    "deploy:cloudflare": "npm run build:cloudflare && wrangler deploy",
     "build:sites": "node scripts/build-sites.mjs",
     "start": "next start --hostname 0.0.0.0",
     "typecheck": "tsc --noEmit",
@@ -36,6 +40,7 @@
     "prettier": "^3.9.6",
     "tailwindcss": "^4.1.0",
     "tsx": "^4.20.0",
-    "typescript": "^5.9.0"
+    "typescript": "^5.9.0",
+    "wrangler": "^4.131.1"
   }
 }

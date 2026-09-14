@@ -7,3 +7,5 @@ dist/
 !.env.example
 *.tgz
 *.zip
+.wrangler/
+.dev.vars*

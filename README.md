@@ -105,6 +105,8 @@ package-lock.json
 
 ## Sites statik dağıtımı
 
+**Bağımsız barındırma hazırlığı:** `npm run build:cloudflare` ve `wrangler.jsonc`, uygulamayı kullanıcının kendi Cloudflare hesabına taşımak için eklendi. Bu komut Sites manifestini kullanmaz ve eksik Supabase ayarında durur. Canlı taşıma henüz tamamlanmadı. Hesaplar, domain, e-posta ve QR geçişi: [bağımsız barındırma](docs/independent-hosting.md).
+
 Varsayılan `npm run build` ve `npm start`, gerçek Next.js Node sunucusunu kullanır. `npm run build:sites` aynı uygulamayı `out/` içine statik çıkarır. `.openai/hosting.json` içindeki `static.not_found_handling: "single-page-application"`, derlemeden sonra oluşturulan URL'ler için `index.html` döndürür. `StaticRouteFallback`, gerçek tarayıcı URL'si `/rehber/<slug>` ise `GuestLoader` bileşenini açar: bulut modunda yalnızca yayımlanmış rehber sorgulanır; bağlantısız yerel modda LocalStorage kullanılır. Ana sayfa korunur; ilgisiz veya geçersiz yollar sayfa bulunamadı ekranını gösterir. 404 belgesinde de aynı rehber kurtarma bileşeni bulunur. `_redirects` dosyasının Sites tarafından işlendiği varsayılmaz. Başka statik hostta `index.html` SPA fallback ayarı gerekir. Genel SPA fallback nedeniyle bilinmeyen yolların HTTP durumu 200 olabilir; gerçek sunucu 404 durumları gerektiğinde normal Next.js sunucusu kullanılmalıdır. Supabase SSR aşamasında bu statik adaptör kaldırılabilir.
 
 Kaynaklar: [Next.js Static Exports](https://nextjs.org/docs/app/guides/static-exports), [Cloudflare Static Assets Redirects](https://developers.cloudflare.com/workers/static-assets/redirects/).

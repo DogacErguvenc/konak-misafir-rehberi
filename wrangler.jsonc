@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "konak-misafir-rehberi",
+  "compatibility_date": "2026-09-14",
+  "assets": {
+    "directory": "./out",
+    "html_handling": "auto-trailing-slash",
+    // Guide slugs are created in Supabase after the static build.
+    // The homepage fallback resolves their URL and loads the published guide.
+    "not_found_handling": "single-page-application"
+  }
+}

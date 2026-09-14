@@ -7,7 +7,7 @@ import { PageNotFound } from "@/components/page-not-found";
 import { resolvePublicRoute, type PublicRoute } from "@/lib/public-route";
 
 /**
- * Sites serves index.html for paths created after the static export.
+ * The static host serves index.html for paths created after the static export.
  * Read the browser URL after hydration, since the exported Next router tree
  * still describes the homepage. Also recover guide links on 404-page hosts.
  */
