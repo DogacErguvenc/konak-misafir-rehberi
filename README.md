@@ -1,8 +1,58 @@
-# Konak — Dijital Misafir Rehberi
+# Konak — Digital Guest Guide
 
-Türkiye'deki villa, bungalov ve kısa dönem kiralama işletmeleri için Next.js App Router MVP'si. Misafir rehberi, dört adımlı ev sahibi paneli ve etkileşimli telefon önizlemeli açılış sayfası aynı veri modelini kullanır.
+**A Next.js and TypeScript application for hosts to create property guides and share them through links and QR codes.**
 
-**Hesap ve ortak veritabanı aşaması:** Supabase Auth, işletme yalıtımı, yayımlanmış rehberler, taslaklar ve eski kayıt aktarımı hazırdır. Canlı bağlantı ve erişim kuralları doğrulandı; ilk hesap e-postası doğrulanıp işletme oluşturuldu, eski rehber taslak olarak aktarıldı. 13 Eylül 2026'da kurgusal bir demo rehberi yayımlandı ve yeni misafir adresi açıldı; anonim API erişimi de doğrulandı. Müşteri e-postaları için SMTP, misafirler için site paylaşımı, şifre yenileme ve fiziksel QR kabul testi kalmıştır. Ayrıntılar: [Supabase kurulumu](docs/supabase-setup.md). Yeni bir kurulumda iki bağlantı değişkeni tanımlı değilse yerel deneme modu açılır; eksik veya hatalı bulut ayarı sessizce yerel kayda dönmez.
+Hosts can edit property details, Wi-Fi information, instructions, and nearby places from a dashboard, then publish a guide for guests. The interface supports Turkish, English, and Arabic, including right-to-left layout for Arabic. Host-entered content is not automatically translated.
+
+## What the project demonstrates
+
+- A replaceable data layer with LocalStorage demo and Supabase-backed cloud repositories.
+- Account authentication, workspace membership, and tenant-scoped SQL functions.
+- Separate draft and published content so editing a draft does not immediately change the guest guide.
+- Revision checks for conflicting edits and repeatable import of local guides.
+- QR generation, stable guide URLs, printable cards, and responsive guest views.
+- Repository, routing, configuration, and database tests.
+
+**Stack:** Next.js App Router · React · TypeScript · Tailwind CSS · Zod · Supabase Auth / PostgreSQL · PGlite
+
+Seeded business and contact information is fictional; photographs are illustrative. Photo attribution and detailed Turkish documentation appear below.
+
+## Quick start — local demo
+
+Requires Node.js 20.9 or later.
+
+```sh
+git clone https://github.com/DogacErguvenc/konak-misafir-rehberi.git
+cd konak-misafir-rehberi
+npm ci
+npm run dev
+```
+
+Open http://localhost:3000. Leave both Supabase environment variables unset to use the local demo. In this mode, newly created guides are stored only in the same browser; their QR codes do not make that local data available on another device. The seeded demo guide is at `/rehber/sapanca-doga-3`.
+
+For cloud mode, configure your own Supabase project using [the setup guide](docs/supabase-setup.md). Cloud mode adds accounts, shared storage, and published guides accessible across devices. Do not point a development copy at someone else's production service.
+
+## Code to explore
+
+| Path | Purpose |
+|---|---|
+| `components/dashboard/` | Guide editing, validation, preview, and QR workflow |
+| `components/guide/` | Guest guide, language selection, and published-guide loading |
+| `lib/repositories/` | Local and cloud data access |
+| `supabase/migrations/` | Schema, access checks, draft/publish operations, and revision control |
+| `tests/` | Local repository, routing, Supabase configuration, and database behavior |
+
+## Development checks
+
+```sh
+npm run typecheck
+npm test
+npm run build
+```
+
+These commands are separate from browser, real-device QR scanning, and live-service acceptance checks. This is an MVP: payments, subscriptions, automatic translation, and offline PWA support are outside the current scope.
+
+## Türkçe dokümantasyon
 
 ## Kurulum
 
