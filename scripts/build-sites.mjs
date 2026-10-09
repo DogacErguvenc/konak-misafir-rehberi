@@ -1,13 +1,16 @@
 import { spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 // Standard Next.js remains the default runtime. Sites' supported SPA fallback
 // serves index.html for new guide paths; StaticRouteFallback resolves the URL.
-const hosting = JSON.parse(readFileSync(resolve(".openai/hosting.json"), "utf8"));
-if (hosting.static?.not_found_handling !== "single-page-application") {
-  throw new Error(
-    "Sites requires static.not_found_handling=single-page-application for new guide URLs.",
-  );
+const hostingPath = resolve(".openai/hosting.json");
+if (existsSync(hostingPath)) {
+  const hosting = JSON.parse(readFileSync(hostingPath, "utf8"));
+  if (hosting.static?.not_found_handling !== "single-page-application") {
+    throw new Error(
+      "Sites requires static.not_found_handling=single-page-application for new guide URLs.",
+    );
+  }
 }
 const build = spawnSync(
   process.execPath,
